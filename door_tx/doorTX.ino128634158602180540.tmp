@@ -1,0 +1,22 @@
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+int msg[1];
+RF24 radio(9, 10);
+const uint64_t pipe = 0xE8E8F0F0E1LL;
+
+void setup(void) {
+  Serial.begin(115200);
+  radio.begin();
+  radio.setChannel(120);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.openWritingPipe(pipe);
+}
+
+void loop(void) {
+  msg[0] = 111;
+  radio.write(msg, 1);
+  Serial.println("TX OK");
+  delay(20);
+}

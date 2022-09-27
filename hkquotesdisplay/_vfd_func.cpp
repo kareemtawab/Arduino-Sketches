@@ -1,7 +1,7 @@
 #include "_vfd_func.h"
 #include "_sntp_func.h"
 #include "_rtc_func.h"
-#include "_quotes_func.h"
+#include "_jokes_func.h"
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -9,7 +9,7 @@
 char daysOfTheWeek[7][5] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 int line_1_content, line_2_content;
 extern bool time_obtained_sntp;
-extern String quote_string;
+extern String joke_string;
 extern bool quote_obtained;
 
 char top[21];
@@ -24,6 +24,7 @@ void vfd_init (void) {
   Serial.begin(9600);
   Serial.write(0x1B);
   Serial.write(0x40);
+  Serial.write(0x0C);
   Serial.write(0x0C);
   display_intro();
 }
@@ -91,7 +92,7 @@ void set_cursor_bot_line (void) {
 
 void string_scroller (void) {
   String result;
-  String StrProcess = "                        " + quote_string + "                        ";
+  String StrProcess = "                        " + joke_string + "                        ";
   result = StrProcess.substring(Li, Lii);
   Li++;
   Lii++;
@@ -109,7 +110,7 @@ void Clear_Scroll_LCD_Left(void) {
 
 void display_intro (void) {
   set_cursor_top_line();
-  sprintf(top, "Quotes + Clock");
+  sprintf(top, "The Joking Clock");
   Serial.write(top);
 
   set_cursor_bot_line();

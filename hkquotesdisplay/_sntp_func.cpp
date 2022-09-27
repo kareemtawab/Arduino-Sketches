@@ -13,7 +13,7 @@ void sntp_init (void) {
   timeClient.begin();
 }
 
-void sntp_update (void) {
+bool sntp_update (void) {
   timeClient.forceUpdate();
   if (timeClient.isTimeSet()) {
     time_obtained_sntp = true;
@@ -23,6 +23,10 @@ void sntp_update (void) {
   }
   if (time_obtained_sntp) {
     setTime(sntp_get_epoch());
+    return true;
+  }
+  else {
+    return false;
   }
 }
 

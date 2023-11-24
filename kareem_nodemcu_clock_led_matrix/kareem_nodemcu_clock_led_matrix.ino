@@ -14,9 +14,7 @@
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 4
-#define CLK_PIN   D5
-#define DATA_PIN  D7
-#define CS_PIN    D8
+#define CS_PIN    15 // GPIO15 for D8
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 ESP8266WiFiMulti wifiMulti;
@@ -44,6 +42,7 @@ void handleRoot() {
 void setup() {
   Serial.begin(115200);
   Serial.println();
+  Serial.println("LED Matrix Clock");
 
   P.begin();
   P.setIntensity(1);

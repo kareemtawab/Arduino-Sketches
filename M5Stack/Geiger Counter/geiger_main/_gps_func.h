@@ -12,5 +12,7 @@ int gps_get_sat (void);
 int gps_get_hours (void);
 int gps_get_minutes (void);
 int gps_get_seconds (void);
-
+int gps_get_days (void);
+int gps_get_months (void);
+int gps_get_years (void);
 #endif

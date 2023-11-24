@@ -5,7 +5,9 @@ void init_geiger (void);
 void geiger_update (void);
 int geiger_getCPM(void);
 float geiger_getSieverts(void);
+float geiger_getAvgSieverts(void);
 float geiger_getRems(void);
+float geiger_getRoentgens(void);
 int geiger_getDangerLevel(void);
 void geiger_ISR(void);
 

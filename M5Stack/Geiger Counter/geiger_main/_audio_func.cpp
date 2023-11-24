@@ -1,70 +1,102 @@
 #include "_audio_func.h"
-//#include <M5Core2.h>
-#include <M5Unified.h>
+#include "_eeprom_func.h"
+#include "_geiger_func.h"
 #include "audio_data.c"
 #include <driver/i2s.h>
+#include <esp_task_wdt.h>
+#include <Arduino.h>
 
 #define CONFIG_I2S_BCK_PIN 12
 #define CONFIG_I2S_LRCK_PIN 0
 #define CONFIG_I2S_DATA_OUT_PIN 2
-#define CONFIG_I2S_DATA_IN_PIN 34
-#define Speak_I2S_NUMBER I2S_NUM_0
+#define CONFIG_I2S_DATA_IN_PIN 34  // defined although not needed for now
+#define CONFIG_I2S_PORT_NUMBER I2S_NUM_0
 #define BUZZER_PIN 19
 
-extern bool geiger_audio_enabled;
+bool audioStopped;
+static const i2s_port_t i2s_num = CONFIG_I2S_PORT_NUMBER;  // i2s port number
+static const i2s_config_t i2s_config = {
+  .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+  .sample_rate = 16000,
+  .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+  .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
+  .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_MSB),
+  .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,  // high interrupt priority
+  .dma_buf_count = 8,                        // 8 buffers
+  .dma_buf_len = 1024,                       // 1K per buffer, so 8K of buffer space
+  .use_apll = 0,
+  .tx_desc_auto_clear = true,
+  .fixed_mclk = -1
+};
+static const i2s_pin_config_t pin_config = {
+  .bck_io_num = CONFIG_I2S_BCK_PIN,         // The bit clock connectiom, goes to pin 27 of ESP32
+  .ws_io_num = CONFIG_I2S_LRCK_PIN,         // Word select, also known as word select or left right clock
+  .data_out_num = CONFIG_I2S_DATA_OUT_PIN,  // Data out from the ESP32, connect to DIN on 38357A
+  .data_in_num = CONFIG_I2S_DATA_IN_PIN     // we are not interested in I2S data into the ESP32
+};
 extern bool gm_pulse_detected;
+bool isClickerOn;
 
 void init_audio(void) {
-  //pinMode(BUZZER_PIN, OUTPUT);
-  ledcSetup(0, 2000, 8);
-  ledcAttachPin(BUZZER_PIN, 0);
-
-
-  // SPEAKER CONFIG
-  auto spk_cfg = M5.Speaker.config();
-  // Increasing the sample_rate will improve the sound quality instead of increasing the CPU load.
-  spk_cfg.sample_rate = 96000; // default:64000 (64kHz)  e.g. 48000 , 50000 , 80000 , 96000 , 100000 , 128000 , 144000 , 192000 , 200000
-  spk_cfg.pin_data_out = CONFIG_I2S_DATA_OUT_PIN;
-  spk_cfg.pin_bck = CONFIG_I2S_BCK_PIN;
-  spk_cfg.pin_ws = CONFIG_I2S_LRCK_PIN;   // LRCK
-  /// use single gpio buzzer, ( need only pin_data_out )
-  spk_cfg.buzzer = false;
-  /// use DAC speaker, ( need only pin_data_out ) ( only GPIO_NUM_25 or GPIO_NUM_26 )
-  spk_cfg.use_dac = false;
-  // spk_cfg.dac_zero_level = 64; // for Unit buzzer with DAC.
-  /// Volume Multiplier
-  spk_cfg.magnification = 16;
-  M5.Speaker.config(spk_cfg);
-  M5.Speaker.begin();
-
-  /// The setVolume function can be set the master volume in the range of 0-255.
-  M5.Speaker.setVolume(255);
-  /// The setAllChannelVolume function can be set the all virtual channel volume in the range of 0-255.
-  M5.Speaker.setAllChannelVolume(255);
-  /// The setChannelVolume function can be set the specified virtual channel volume in the range of 0-255.
-  M5.Speaker.setChannelVolume(0, 255);
-  /// play 2000Hz tone sound, 40 msec.
-  M5.Speaker.tone(2000, 50);
+  pinMode(BUZZER_PIN, OUTPUT);
+  i2s_driver_install(i2s_num, &i2s_config, 0, NULL);  // ESP32 will allocated resources to run I2S
+  i2s_set_pin(i2s_num, &pin_config);                  // Tell it the pins you will be using
+  xTaskCreatePinnedToCore(play_intro_task, "play_intro_task", 4096, NULL, 100, NULL, 1);
+  xTaskCreatePinnedToCore(play_alarm_task, "play_alarm_task", 4096, NULL, 100, NULL, 1);
 }
 
 void audio_update(void) {
-  //digitalWrite(BUZZER_PIN, LOW);
-  ledcWrite(0, 0);
-  if (gm_pulse_detected && geiger_audio_enabled) {
-    //digitalWrite(BUZZER_PIN, HIGH);
-    ledcWrite(0, 128);
+  if (geiger_getCPM() != -1 && isClickerOn) {
+    GPIO.out_w1tc = ((uint32_t)1 << BUZZER_PIN);
+    isClickerOn = false;
+  }
+  if (gm_pulse_detected && eeprom_get_audio() && !isClickerOn) {
+    GPIO.out_w1ts = ((uint32_t)1 << BUZZER_PIN);
+    isClickerOn = true;
     gm_pulse_detected = false;
   }
 }
 
-void audio_dingdong(void) {
-  if (geiger_audio_enabled) {
-
+void play_intro_task(void *pvParameters) {
+  while (!audioStopped && eeprom_get_audio()) {
+    play_intro();
   }
+  vTaskDelete(NULL);
 }
 
-void audio_warning(void) {
-  if (geiger_audio_enabled) {
-
+void play_alarm_task(void *pvParameters) {
+  const TickType_t xFrequency = pdMS_TO_TICKS(1000);
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  while (1) {
+    if (eeprom_get_audio() && geiger_getDangerLevel() == 5 && audioStopped) {
+      play_alarm();
+    }
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    xLastWakeTime = xTaskGetTickCount();
   }
+  vTaskDelete(NULL);
+}
+
+void play_intro() {
+  // i2s_start(i2s_num);
+  audioStopped = false;
+  size_t BytesWritten;  // Returned by the I2S write routine, we are not interested in it
+  // As the WAV data for this example is in form of two 16 bit signed values we can send each four bytes direct to I2S
+  for (int i = 0; i < sizeof(intro_audio); i += 2) {  // DataIdx += 2 increase the data index to next 16 bit value (2 bytes)
+    i2s_write(i2s_num, intro_audio + i, 4, &BytesWritten, portMAX_DELAY);
+  }
+  audioStopped = true;
+  // i2s_stop(i2s_num);
+}
+
+void play_alarm() {
+  // i2s_start(i2s_num);
+  audioStopped = false;
+  size_t BytesWritten;  // Returned by the I2S write routine, we are not interested in it
+  // As the WAV data for this example is in form of two 16 bit signed values we can send each four bytes direct to I2S
+  for (int i = 0; i < sizeof(alarm_audio); i += 2) {  // DataIdx += 2 increase the data index to next 16 bit value (2 bytes)
+    i2s_write(i2s_num, alarm_audio + i, 4, &BytesWritten, portMAX_DELAY);
+  }
+  audioStopped = true;
+  // i2s_stop(i2s_num);
 }

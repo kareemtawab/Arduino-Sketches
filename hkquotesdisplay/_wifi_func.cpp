@@ -2,6 +2,7 @@
 #include "_vfd_func.h"
 #include "_jokes_func.h"
 #include "_rtc_func.h"
+#include "_sntp_func.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -18,7 +19,7 @@ IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(192, 168, 1, 167);   //optional
 IPAddress secondaryDNS(8, 8, 8, 8); //optional
 
-extern String joke_string;
+extern String jerky_bottom_string;
 extern char top[21];
 
 void wifi_init (void) {
@@ -31,11 +32,14 @@ void wifi_init (void) {
   //wifiMulti.addAP("HK SG Note 9", "07081989");
   wifiMulti.run();
 
-  WiFi.hostname("HKjokesDisplay");
-  MDNS.begin("HKjokesDisplay");
+  WiFi.hostname("HKJokesDisplay");
+  MDNS.begin("HKJokesDisplay");
 
   server.on("/", []() {
-    server.send(200, "text/plain", String(top) + "\n" + "NTP Epoch = " + sntp_get_epoch() + "\n" + "RTC Epoch = " + sntp_get_epoch() + "\n" + String(joke_string));
+    server.send(200, "text/plain", "Top VFD line: {" + String(top) + "}\n"
+                + "Bottom VFD line: {" + String(jerky_bottom_string) + "}\n"
+                + "SNTP Epoch = " + sntp_get_epoch() + "\n"
+                + "RTC Epoch = " + now() + "\n");
   });
   ElegantOTA.begin(&server);
   server.begin();

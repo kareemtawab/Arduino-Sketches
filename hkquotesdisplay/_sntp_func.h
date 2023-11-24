@@ -2,7 +2,7 @@
 #define _sntp_func_h
 
 void sntp_init (void);
-bool sntp_update (void);
-long long int sntp_get_epoch (void);
+void sntp_update (void);
+unsigned int sntp_get_epoch (void);
 
 #endif

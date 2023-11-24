@@ -6,10 +6,10 @@
 #include <ArduinoJson.h>
 
 #define host "http://official-joke-api.appspot.com/random_joke"
-String joke_string_joke;
-String joke_string_punchline;
-String joke_string;
-bool quote_obtained = false;
+String jerky_bottom_string_joke;
+String jerky_bottom_string_punchline;
+String jerky_bottom_string;
+bool joke_obtained = false;
 
 WiFiClient wifiClient;
 HTTPClient http;    //Declare object of class HTTPClient
@@ -17,9 +17,9 @@ DynamicJsonBuffer jsonBuffer;
 
 void jokes_init (void) {
   http.begin(wifiClient, host);
-  joke_string_joke.reserve(30);
-  joke_string_punchline.reserve(20);
-  joke_string.reserve(150);
+  jerky_bottom_string_joke.reserve(30);
+  jerky_bottom_string_punchline.reserve(30);
+  jerky_bottom_string.reserve(200);
 }
 
 void jokes_get (void) {
@@ -28,12 +28,12 @@ void jokes_get (void) {
   String payload = http.getString();    //Get the response payload from server
   if (httpCode == 200) {
     JsonObject& root = jsonBuffer.parseObject(payload);
-    joke_string_joke = root["setup"].as<String>();
-    joke_string_punchline = root["punchline"].as<String>();
-    joke_string = joke_string_joke + "          ~~~>           " + joke_string_punchline;
+    jerky_bottom_string_joke = root["setup"].as<String>();
+    jerky_bottom_string_punchline = root["punchline"].as<String>();
+    jerky_bottom_string = jerky_bottom_string_joke + "          --->           " + jerky_bottom_string_punchline;
   }
   else {
-    joke_string = "ERR: NULL GET RESPONSE!";
+    jerky_bottom_string = "ERR: NULL GET RESPONSE!";
   }
-  quote_obtained = true;
+  joke_obtained = true;
 }

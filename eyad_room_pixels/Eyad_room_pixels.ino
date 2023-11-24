@@ -21,7 +21,7 @@ DMDESP Disp(DISPLAYS_WIDE, DISPLAYS_HIGH);
 IPAddress local_IP(192, 168, 1, 159);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
-IPAddress primaryDNS(192, 168, 1, 167);   //optional
+IPAddress primaryDNS(192, 168, 1, 168);   //optional
 IPAddress secondaryDNS(8, 8, 8, 8); //optional
 
 String MAIN_page() {

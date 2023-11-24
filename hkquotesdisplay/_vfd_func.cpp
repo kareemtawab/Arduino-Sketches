@@ -9,8 +9,11 @@
 char daysOfTheWeek[7][5] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 int line_1_content, line_2_content;
 extern bool time_obtained_sntp;
-extern String joke_string;
-extern bool quote_obtained;
+extern String jerky_bottom_string;
+extern bool joke_obtained;
+extern bool rtc_fail_init;
+extern bool rtc_fail_lost_power;
+extern bool rtc_ok;
 
 char top[21];
 char bot[21];
@@ -26,29 +29,24 @@ void vfd_init (void) {
   Serial.write(0x40);
   Serial.write(0x0C);
   Serial.write(0x0C);
+  Serial.write(0x1B);
+  Serial.write(0x40);
   display_intro();
 }
 
 void vfd_update (void) {
-  if (!time_obtained_sntp) {
-    line_1_content = 0;
-  }
-  if (!quote_obtained) {
-    line_2_content = 0;
-  }
-  if (time_obtained_sntp) {
+  if (rtc_ok) {
     line_1_content = 1;
   }
-  if (quote_obtained) {
-    line_2_content = 1;
+  if (rtc_fail_init && rtc_fail_lost_power) {
+    line_1_content = 2;
+  }
+  if (!rtc_fail_init && rtc_fail_lost_power) {
+    line_1_content = 3;
   }
 
   set_cursor_top_line();
   switch (line_1_content) {
-    case 0: // display time needs resync
-      sprintf(top, "Getting time/date ...");
-      Serial.write(top);
-      break;
     case 1: // display normal time
       char a[3];
       if (isAM()) {
@@ -60,23 +58,19 @@ void vfd_update (void) {
       sprintf(top, "%02d:%02d:%02d%s  %02d.%02d.%02d", hourFormat12(), minute(), second(), a , day(), month(), abs(year() - 2000));
       Serial.write(top);
       break;
-    case 2:
+    case 2: // display rtc init fail
+      sprintf(top, "ERR: RTC FAIL INIT!");
+      Serial.write(top);
+      break;
+    case 3: // display rtc lost power
+      sprintf(top, "ERR: RTC LOST POWER!");
+      Serial.write(top);
       break;
   }
 
   set_cursor_bot_line();
-  switch (line_2_content) {
-    case 0: //
-      sprintf(top, "Getting quote ...");
-      Serial.write(bot);
-      break;
-    case 1: //
-      string_scroller();
-      Serial.write(bot);
-      break;
-    case 2:
-      break;
-  }
+  string_scroller();
+  Serial.write(bot);
 }
 
 void set_cursor_top_line (void) {
@@ -92,11 +86,11 @@ void set_cursor_bot_line (void) {
 
 void string_scroller (void) {
   String result;
-  String StrProcess = "                        " + joke_string + "                        ";
-  result = StrProcess.substring(Li, Lii);
+  String strProcess = "                        " + jerky_bottom_string + "                        ";
+  result = strProcess.substring(Li, Lii);
   Li++;
   Lii++;
-  if (Li > StrProcess.length()) {
+  if (Li > strProcess.length()) {
     Li = 20;
     Lii = 0;
   }
@@ -117,6 +111,6 @@ void display_intro (void) {
   sprintf(bot, "SNTP + RTC + WiFi");
   Serial.write(bot);
 
-  delay(5000);
+  delay(8000);
   Serial.write(0x0C);
 }

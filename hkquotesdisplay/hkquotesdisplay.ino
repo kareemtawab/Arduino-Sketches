@@ -10,15 +10,15 @@ Timer timer;
 void setup() {
   wifi_init();
   vfd_init();
-  rtc_init();
   sntp_init();
-  jokes_init();
   sntp_update();
+  rtc_init();
+  jokes_init();
   jokes_get();
   timer.every(20, wifi_update);
-  timer.every(100, vfd_update);
-  timer.every(300000, sntp_update);
-  timer.every(120000, jokes_get);
+  timer.every(125, vfd_update);
+  timer.every(30000, sntp_update);
+  timer.every(300000, jokes_get);
 }
 
 void loop() {

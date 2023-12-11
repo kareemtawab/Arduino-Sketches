@@ -1,4 +1,4 @@
-#include <DS3232RTC.h>      // https://github.com/JChristensen/DS3232RTC
+#include <DS3232RTC.h>  // https://github.com/JChristensen/DS3232RTC
 #include <TimeLib.h>
 #include "Timer.h"
 #include <SoftwareSerial.h>
@@ -6,16 +6,16 @@
 #include <EEPROMex.h>
 #include "Arduino.h"
 
-#define SIM800LRX  4
-#define SIM800LTX  3
+#define SIM800LRX 4
+#define SIM800LTX 3
 #define REED_Pin 2
 #define RTC_Pin LED_BUILTIN
-#define SIM800LRST_PIN 10 // you can use any pin.
+#define SIM800LRST_PIN 10  // you can use any pin.
 
 DS3232RTC myRTC;
 Timer t;
-SoftwareSerial SIM800Lserial(SIM800LRX, SIM800LTX); // RX, TX
-GSMSimSMS SIM800L(SIM800Lserial, SIM800LRST_PIN); // SIM800LSimSMS inherit from SIM800LSim. You can use SIM800LSim methods with it.
+SoftwareSerial SIM800Lserial(SIM800LRX, SIM800LTX);  // RX, TX
+GSMSimSMS SIM800L(SIM800Lserial, SIM800LRST_PIN);    // SIM800LSimSMS inherit from SIM800LSim. You can use SIM800LSim methods with it.
 
 bool isDoorOPEN, wasDoorOPEN;
 bool sanitycheckrequired;
@@ -34,8 +34,8 @@ unsigned long systemTimestamp;
 unsigned long systemLastTimestamp;
 unsigned long systemLastsanitycheckTimestamp;
 unsigned long timesincelastSanitycheck;
-unsigned long sanitycheckSMSinterval = 1 * (30 * 24 * 60 * 60); // sanity check SMS interval in seconds
-unsigned long checkDoorInterval = 5 * (60); // system check interval in seconds
+unsigned long sanitycheckSMSinterval = 1 * (30 * 24 * 60 * 60);  // sanity check SMS interval in seconds
+unsigned long checkDoorInterval = 5 * (60);                      // system check interval in seconds
 
 void setup() {
   Serial.begin(115200);
@@ -47,10 +47,23 @@ void setup() {
   SIM800Lserial.begin(9600);
   SIM800L.init();
   pinMode(REED_Pin, INPUT_PULLUP);
-  pinMode(RTC_Pin, OUTPUT);
-  digitalWrite(RTC_Pin, HIGH);
+  // pinMode(RTC_Pin, OUTPUT);
+  // digitalWrite(RTC_Pin, HIGH);
   myRTC.begin();
-  setSyncProvider(myRTC.get);   // the function to get the time from the RTC
+  setSyncProvider(myRTC.get);  // the function to get the time from the RTC
+
+  // time_t timeToSet;
+  // tmElements_t tm;
+  // tm.Year = CalendarYrToTm(2023);
+  // tm.Month = 12;
+  // tm.Day = 7;
+  // tm.Hour = 9;
+  // tm.Minute = 40;
+  // tm.Second = 00;
+  // timeToSet = makeTime(tm);
+  // myRTC.set(timeToSet);  // use the time_t value to ensure correct weekday is set
+  // setTime(timeToSet);
+
   t.every(250, getDoorState);
   t.every(checkDoorInterval * 1000, intervalCheckSystemState);
   t.every(10000, checkIncomingCall);
@@ -85,8 +98,7 @@ void getDoorState() {
       if (SIM800LStatus == 0) {
         sendtoSIM800L_ondoorCLOSE();
       }
-    }
-    else {
+    } else {
       if (SIM800LStatus == 0) {
         sendtoSIM800L_ondoorOPEN();
       }
@@ -173,8 +185,7 @@ void printSystemState() {
   Serial.print(F("degC | Door State: "));
   if (isDoorOPEN) {
     Serial.print(F("OPENED"));
-  }
-  else {
+  } else {
     Serial.print(F("CLOSED"));
   }
   Serial.print(F(" | SMS Count: "));
@@ -201,49 +212,50 @@ void intro() {
   Serial.print(F("Operator Name... "));
   Serial.println(SIM800L.operatorName());
   Serial.print(F("Init SMS... "));
-  Serial.println(SIM800L.initSMS()); // Its optional but highly recommended. Some function work with this function.
+  Serial.println(SIM800L.initSMS());  // Its optional but highly recommended. Some function work with this function.
 }
 
 void sendtoSIM800L_ondoorOPEN() {
   systemLastTimestamp = systemTimestamp;
   EEPROM.updateLong(systemLastTimestampaddress, systemLastTimestamp);
-  char SMStext [160];;
+  char SMStext[160];
+  ;
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Alert! Store door opened at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo1, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Alert! Store door opened at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo1, SMStext);  // only use ascii chars please
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Alert! Store door opened at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo2, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Alert! Store door opened at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo2, SMStext);  // only use ascii chars please
 }
 
 void sendtoSIM800L_ondoorCLOSE() {
   systemLastTimestamp = systemTimestamp;
   EEPROM.updateLong(systemLastTimestampaddress, systemLastTimestamp);
-  char SMStext [160];
+  char SMStext[160];
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Alert! Store door closed at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo1, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Alert! Store door closed at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo1, SMStext);  // only use ascii chars please
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Alert! Store door closed at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo2, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Alert! Store door closed at %02d:%02d:%02d on %s %02d/%02d/%d, Temperature: %02d degC.\nTotal sent SMS count: %d.", hour(), minute(), second(), dayShortStr(weekday()), day(), month(), year(), systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo2, SMStext);  // only use ascii chars please
 }
 
 void sendtoSIM800L_onintervalwhileOPEN() {
   systemLastTimestamp = systemTimestamp;
   EEPROM.updateLong(systemLastTimestampaddress, systemLastTimestamp);
-  char SMStext [160];
+  char SMStext[160];
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Store door is still opened for the last %d seconds. Last epoch: %ld, Temperature: %02d degC.\nTotal sent SMS count: %d.", int(checkDoorInterval), systemLastTimestamp, systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo1, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Store door is still opened for the last %d seconds. Last epoch: %ld, Temperature: %02d degC.\nTotal sent SMS count: %d.", int(checkDoorInterval), systemLastTimestamp, systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo1, SMStext);  // only use ascii chars please
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Store door is still opened for the last %d seconds. Last epoch: %ld, Temperature: %02d degC.\nTotal sent SMS count: %d.", int(checkDoorInterval), systemLastTimestamp, systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo2, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Store door is still opened for the last %d seconds. Last epoch: %ld, Temperature: %02d degC.\nTotal sent SMS count: %d.", int(checkDoorInterval), systemLastTimestamp, systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo2, SMStext);  // only use ascii chars please
 }
 
 void sendtoSIM800L_onsanitycheck() {
@@ -254,15 +266,15 @@ void sendtoSIM800L_onsanitycheck() {
   EEPROM.updateLong(systemLastsanitycheckTimestampaddress, systemLastsanitycheckTimestamp);
   EEPROM.updateInt(sanitycheckrequiredaddress, sanitycheckrequired);
   systemInboxSMScount = SIM800L.list(false);
-  char SMStext [160];
+  char SMStext[160];
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Store door alarm system sanity check! Temperature: %02d degC.\nTotal sent SMS count: %d.\nInbox is being purged now.", systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo1, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Store door alarm system sanity check! Temperature: %02d degC.\nTotal sent SMS count: %d.\nInbox is being purged now.", systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo1, SMStext);  // only use ascii chars please
   systemSentSMScounter++;
   EEPROM.updateInt(systemSentSMScounteraddress, systemSentSMScounter);
-  sprintf (SMStext, "Store door alarm system sanity check! Temperature: %02d degC.\nTotal sent SMS count: %d.\nInbox is being purged now.", systemTemperature, systemSentSMScounter);
-  SIM800L.send(PhoneNo2, SMStext); // only use ascii chars please
+  sprintf(SMStext, "Store door alarm system sanity check! Temperature: %02d degC.\nTotal sent SMS count: %d.\nInbox is being purged now.", systemTemperature, systemSentSMScounter);
+  SIM800L.send(PhoneNo2, SMStext);  // only use ascii chars please
   SIM800L.deleteAll();
 }
 

@@ -21,7 +21,7 @@
 ESP8266WebServer server(80);
 ESP8266WiFiMulti wifiMulti;
 DMDESP Disp(DISPLAYS_WIDE, DISPLAYS_HIGH);
-IPAddress local_IP(192, 168, 1, 53);
+IPAddress local_IP(192, 168, 1, 52);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(192, 168, 1, 168);  //optional
@@ -36,7 +36,7 @@ Timer t;
 char timeForDisplay[5], dateForDisplay[8];
 bool gotNTPTime, isBlink;
 String weekdays[] = { "",  "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
-bool isDSTenabled = true;
+bool isDSTenabled = false;
 
 void getNTPTime() {
   if (!gotNTPTime) {
@@ -85,8 +85,8 @@ void setup() {
 
   WiFi.mode(WIFI_STA);  // explicitly set mode, esp defaults to STA+AP
   WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS);
-  wifiMulti.addAP("WAW20_HK2", "!219adeltawab");
-  wifiMulti.addAP("WAW20_AE3", "!219adeltawab");
+  wifiMulti.addAP("WAW20_AE1", "!219adeltawab");
+  wifiMulti.addAP("WAW20_AE2", "!219adeltawab");
   wifiMulti.addAP("WAW20_AE4", "!219adeltawab");
   wifiMulti.run();
   WiFi.hostname("AEDMD2");

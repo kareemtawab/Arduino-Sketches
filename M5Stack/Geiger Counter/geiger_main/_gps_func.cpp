@@ -1,12 +1,9 @@
+#include "def_data.c"
 #include "_gps_func.h"
 #include "_rtc_func.h"
 #include <TinyGPS++.h>
 #include <math.h>
 
-#define X_OFFSET_CORRECTION -8
-#define Y_OFFSET_CORRECTION 13
-#define GPS_SERIAL_RX_PIN 13
-#define GPS_SERIAL_TX_PIN 16
 /*
   Cairo, Egypt
    latitude    = 30.033333; // (φ)
@@ -31,14 +28,14 @@ int mapHeight = 158;
 TinyGPSPlus gps;
 
 void init_gps(void) {
-  Serial2.begin(9600, SERIAL_8N1, GPS_SERIAL_RX_PIN, GPS_SERIAL_TX_PIN);  //RX, TX
+  Serial2.begin(38400, SERIAL_8N1, GPS_SERIAL_RX_PIN, GPS_SERIAL_TX_PIN);  //RX, TX
 }
 
 void gps_update(void) {
   while (Serial2.available() > 0)
     gps.encode(Serial2.read());
   if (gps.time.isValid()) {
-    rtc_set_time_date(gps_get_hours(), gps_get_minutes(), gps_get_seconds(), gps_get_days(), gps_get_months(), gps_get_years());
+    rtc_set_time_date(gps_get_hours(), gps_get_minutes(), gps_get_seconds(), gps_get_days(), gps_get_months(), gps_get_years(), TIMEZONE);
   }
 }
 

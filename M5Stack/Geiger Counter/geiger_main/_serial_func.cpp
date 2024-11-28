@@ -1,3 +1,4 @@
+#include "def_data.c"
 #include "_serial_func.h"
 #include "_rtc_func.h"
 #include "_gps_func.h"

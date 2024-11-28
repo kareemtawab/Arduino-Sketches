@@ -1,21 +1,10 @@
+#include "def_data.c"
 #include "_geiger_func.h"
 #include "_audio_func.h"
 #include "_eeprom_func.h"
 #include "_batt_led_vib_func.h"
 #include "_eeprom_func.h"
 #include <Arduino.h>
-
-#define RADIATION_LEVEL_0 0.40
-#define RADIATION_LEVEL_1 0.69
-#define RADIATION_LEVEL_2 1.23
-#define RADIATION_LEVEL_3 1.89
-#define RADIATION_LEVEL_4 2.52
-#define RADIATION_LEVEL_5 3.00
-
-#define GEIGER_TUBE_PIN 36  //26
-#define GM_LOG_PERIOD 500   //Logging time in milliseconds
-#define Y_PLOTS_UPDATE_PERIOD 1000
-#define VIBRATE_UPDATE_PERIOD 1000
 
 unsigned long previousMillis_cpmCalculation;  // Time measurement
 unsigned long previousMillis_alarmSound;      // Time measurement

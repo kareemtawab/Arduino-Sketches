@@ -1,3 +1,4 @@
+#include "def_data.c"
 #include "_display_func.h"
 #include "_rtc_func.h"
 #include "_batt_led_vib_func.h"
@@ -19,44 +20,6 @@
 #include "icons_data.c"
 #include <M5GFX.h>
 #include <esp_task_wdt.h>
-
-#define display_interval 100
-
-// colors are in are encoded in RGB565
-// http://www.rinkydinkelectronics.com/calc_rgb565.php
-#define colorvalue_default_bg 0x0000
-#define colorvalue_default_fg 0xF607
-
-#define ID_SWITCHOFF -1
-#define MAIN 0
-#define MODE_WORLD 0
-#define MODE_GRAPH 1
-#define MODE_GEIGER 2
-#define MODE_CLOCK 3
-#define MODE_NERD 4
-#define ID_CALIBRATION 5
-#define ID_SETTINGS 6
-#define ID_ABOUT 7
-
-#define MODE_WORLD_X1 15
-#define MODE_WORLD_X2 70
-#define MODE_GRAPH_X1 75
-#define MODE_GRAPH_X2 129
-#define MODE_GEIGER_X1 134
-#define MODE_GEIGER_X2 188
-#define MODE_CLOCK_X1 193
-#define MODE_CLOCK_X2 247
-#define MODE_NERD_X1 252
-#define MODE_NERD_X2 306
-#define MODES_Y1 81
-#define MODES_Y2 149
-
-#define PHASE_NIGHT 0
-#define PHASE_SUNRISE 1
-#define PHASE_MORNING 2
-#define PHASE_SUNSET 3
-
-#define LCD_BRIGHTNESS 145
 
 unsigned int page_id = MAIN;
 bool bkg_drawn;
@@ -298,7 +261,7 @@ void display_update(void) {
         disp.drawString(g, 232, 170);
         sprintf(g, "%09.6f\n", gps_get_long());
         disp.drawString(g, 232, 188);
-        sprintf(g, "%06.1f\n", gps_get_alt());
+        sprintf(g, "%04d\n", gps_get_alt());
         disp.drawString(g, 232, 206);
         break;
       case MODE_GRAPH:
@@ -557,7 +520,7 @@ void display_update(void) {
         disp.setTextColor(WHITE, MAGENTA);
         sprintf(y, "Lat.: %04.1f Lng.: %04.1f", gps_get_lat(), gps_get_long());
         disp.drawString(y, 10, 189);
-        sprintf(y, "Alt.: %06.1f  Sat.: %02d", gps_get_alt(), gps_get_sat());
+        sprintf(y, "Alt.: %04d  Sat.: %02d", gps_get_alt(), gps_get_sat());
         disp.drawString(y, 10, 204);
 
         disp.setTextColor(BLACK, WHITE);

@@ -1,12 +1,8 @@
+#include "def_data.c"
 #include "_neopixel_func.h"
 #include "_geiger_func.h"
 #include "_eeprom_func.h"
 #include <FastLED.h>
-
-#define NUM_LEDS 10
-#define WS2812_DATA_PIN 25
-#define BRIGHTNESS_LEVEL1 25
-#define BRIGHTNESS_LEVEL2 255
 
 int gHue = 0;  // rotating "base color" used by many of the patterns
 bool alternator;

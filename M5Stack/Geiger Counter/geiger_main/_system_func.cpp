@@ -8,28 +8,12 @@
 #include "_gps_func.h"
 #include "_geiger_func.h"
 #include "_serial_func.h"
+#include "def_data.c"
 #include "_eeprom_func.h"
 #include "_file_transfer_func.h"
 #include <driver/adc.h>
 #include <esp_task_wdt.h>
 #include <Wire.h>
-
-#define SDA 21
-#define SCL 22
-
-#define wdt_timeout 8
-
-#define rtc_interval 1000
-#define display_interval 100
-#define touch_interval 50
-#define gps_interval 500
-#define geiger_interval 250
-#define serial_interval 1000
-#define neopixel_interval 100
-#define eeprom_interval 100
-#define audio_interval 2
-#define file_transfer_interval 1000
-#define batt_led_vib_interval 500
 
 void geiger_update_task(void *pvParameters) {
   const TickType_t xFrequency = pdMS_TO_TICKS(geiger_interval);
@@ -161,13 +145,13 @@ void init_system(void) {
   esp_task_wdt_add(NULL);
   esp_task_wdt_reset();
 
-  Wire.begin(SDA, SCL);
+  Wire.begin();
   delay(10);
 
   batt_led_vib_init();
   init_serial();
   init_rtc();
-  // rtc_set_time_date(0, 32, 30, 13, 7, 2022);
+  // rtc_set_time_date(0, 32, 30, 13, 7, 2022, 2);
   init_eeprom();
   init_geiger();
   init_audio();
@@ -189,7 +173,7 @@ void init_system(void) {
   xTaskCreatePinnedToCore(display_update_task, "display_update_task", 81920, NULL, 100, NULL, 1);
   xTaskCreatePinnedToCore(gps_update_task, "gps_update_task", 4096, NULL, 20, NULL, 1);
   xTaskCreatePinnedToCore(neopixel_update_task, "neopixel_update_task", 1024, NULL, 40, NULL, 1);
-  xTaskCreatePinnedToCore(file_transfer_update_task, "file_transfer_update_task", 16384, NULL, 95, NULL, 1);
+  // xTaskCreatePinnedToCore(file_transfer_update_task, "file_transfer_update_task", 16384, NULL, 95, NULL, 1);
 }
 
 void run_system(void) {

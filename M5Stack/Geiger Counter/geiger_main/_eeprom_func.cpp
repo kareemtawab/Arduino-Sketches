@@ -1,11 +1,8 @@
+#include "def_data.c"
 #include "_eeprom_func.h"
 #include "_batt_led_vib_func.h"
 #include "_touch_func.h"
 #include <EEPROM.h>
-
-#define EEPROM_SIZE 15
-#define CPM_PER_USV_PER_H_ADDRESS 2
-#define ALL_SETTINGS_ADDRESS 8
 
 int cpm_per_uSv_per_h;
 unsigned char all_settings;

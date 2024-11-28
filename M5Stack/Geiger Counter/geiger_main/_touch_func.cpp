@@ -1,3 +1,4 @@
+#include "def_data.c"
 #include "_eeprom_func.h"
 #include "_display_func.h"
 #include "_touch_func.h"
@@ -5,30 +6,6 @@
 #include <FT6X36.h>
 
 FT6X36 ts(&Wire, 39);
-
-#define ID_SWITCHOFF -1
-#define MAIN 0
-#define MODE_WORLD 0
-#define MODE_GRAPH 1
-#define MODE_GEIGER 2
-#define MODE_CLOCK 3
-#define MODE_NERD 4
-#define ID_CALIBRATION 5
-#define ID_SETTINGS 6
-#define ID_ABOUT 7
-
-#define MODE_WORLD_X1 15
-#define MODE_WORLD_X2 70
-#define MODE_GRAPH_X1 75
-#define MODE_GRAPH_X2 129
-#define MODE_GEIGER_X1 134
-#define MODE_GEIGER_X2 188
-#define MODE_CLOCK_X1 193
-#define MODE_CLOCK_X2 247
-#define MODE_NERD_X1 252
-#define MODE_NERD_X2 306
-#define MODES_Y1 81
-#define MODES_Y2 149
 
 extern int page_id;
 extern int bkg_drawn;

@@ -9,7 +9,7 @@ int a, b, c, d, e;
 char msg[28];
 
 void setup(void) {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   nrf24.init();
   nrf24.setChannel(10);
@@ -32,7 +32,14 @@ void getall() {
 }
 
 void rfsend() {
-  sprintf(msg, ">7,%d,%d,%d,%d,%d", a, b, c, d, e);
-  Serial.println(msg);
-  nrf24.send(msg, sizeof(msg));
+  sprintf(msg, ">71,%d", a);
+  if (nrf24.send(msg, sizeof(msg)))Serial.println(msg);
+  sprintf(msg, ">72,%d", b);
+  if (nrf24.send(msg, sizeof(msg)))Serial.println(msg);
+  sprintf(msg, ">73,%d", c);
+  if (nrf24.send(msg, sizeof(msg)))Serial.println(msg);
+  sprintf(msg, ">74,%d", d);
+  if (nrf24.send(msg, sizeof(msg)))Serial.println(msg);
+  sprintf(msg, ">75,%d", e);
+  if (nrf24.send(msg, sizeof(msg)))Serial.println(msg);
 }

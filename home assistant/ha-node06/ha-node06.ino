@@ -7,9 +7,9 @@
 
 #define BH1750_ADDRESS 0x23
 BME280 bme280;
-BH1750_WE myBH1750(BH1750_ADDRESS); 
+BH1750_WE myBH1750(BH1750_ADDRESS);
 RH_NRF24 nrf24(9, 10);
-Timer timer; // timer function for the Timer.h library
+Timer timer;  // timer function for the Timer.h library
 
 float t;
 //float a;
@@ -28,7 +28,7 @@ void setup(void) {
 
   Wire.begin();
   bme280.beginI2C();
-  myBH1750.init(); // sets default values: mode = CHM, measuring time factor = 1.0
+  myBH1750.init();  // sets default values: mode = CHM, measuring time factor = 1.0
   myBH1750.setMeasuringTimeFactor(0.45);
 
   timer.every(350, getall);
@@ -43,7 +43,7 @@ void getall() {
   digitalWrite(A0, LOW);
   t = bme280.readTempC();
   //a = bme280.readFloatAltitudeMeters();
-  p = bme280.readFloatPressure() / 100; //to convert Pa to hPa
+  p = bme280.readFloatPressure() / 100;  //to convert Pa to hPa
   h = bme280.readFloatHumidity();
   l = myBH1750.getLux();
 }
@@ -51,15 +51,20 @@ void getall() {
 void rfsend() {
   char temp[10];
   //char alti[10];
-  char pres[10];
-  char humi[10];
-  dtostrf(t , 2, 1, temp);
+  // char pres[10];
+  // char humi[10];
+  dtostrf(t, 2, 1, temp);
   //dtostrf(a , 3, 1, alti);
-  dtostrf(p , 3, 1, pres);
-  dtostrf(h , 2, 1, humi);
+  // dtostrf(p * 10, 3, 1, pres);
+  // dtostrf(h * 10, 2, 1, humi);
   //sprintf(msg, ">6,%s,%s,%s,%s,%ld", temp, alti, pres, humi, l);
-  sprintf(msg, ">6,%s,%s,%s,%ld", temp, pres, humi, l);
-  Serial.println(msg);
-  nrf24.send(msg, sizeof(msg));
+  sprintf(msg, ">61,%s", temp);
+  if (nrf24.send(msg, sizeof(msg))) Serial.println(msg);
+  sprintf(msg, ">62,%d",(int)(p * 10));
+  if (nrf24.send(msg, sizeof(msg))) Serial.println(msg);
+  sprintf(msg, ">63,%d", (int)(h * 10));
+  if (nrf24.send(msg, sizeof(msg))) Serial.println(msg);
+  sprintf(msg, ">64,%05ld", l);
+  if (nrf24.send(msg, sizeof(msg))) Serial.println(msg);
   digitalWrite(A0, HIGH);
 }

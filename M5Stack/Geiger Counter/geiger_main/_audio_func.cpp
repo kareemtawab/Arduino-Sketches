@@ -1,3 +1,4 @@
+#include "def_data.c"
 #include "_audio_func.h"
 #include "_eeprom_func.h"
 #include "_geiger_func.h"
@@ -5,13 +6,6 @@
 #include <driver/i2s.h>
 #include <esp_task_wdt.h>
 #include <Arduino.h>
-
-#define CONFIG_I2S_BCK_PIN 12
-#define CONFIG_I2S_LRCK_PIN 0
-#define CONFIG_I2S_DATA_OUT_PIN 2
-#define CONFIG_I2S_DATA_IN_PIN 34  // defined although not needed for now
-#define CONFIG_I2S_PORT_NUMBER I2S_NUM_0
-#define BUZZER_PIN 19
 
 bool audioStopped;
 static const i2s_port_t i2s_num = CONFIG_I2S_PORT_NUMBER;  // i2s port number
@@ -39,10 +33,12 @@ bool isClickerOn;
 
 void init_audio(void) {
   pinMode(BUZZER_PIN, OUTPUT);
-  i2s_driver_install(i2s_num, &i2s_config, 0, NULL);  // ESP32 will allocated resources to run I2S
-  i2s_set_pin(i2s_num, &pin_config);                  // Tell it the pins you will be using
+  GPIO.out_w1ts = ((uint32_t)1 << BUZZER_PIN);
+  i2s_driver_install(i2s_num, &i2s_config, 0, NULL); 
+  i2s_set_pin(i2s_num, &pin_config);
   xTaskCreatePinnedToCore(play_intro_task, "play_intro_task", 4096, NULL, 100, NULL, 1);
   xTaskCreatePinnedToCore(play_alarm_task, "play_alarm_task", 4096, NULL, 100, NULL, 1);
+  GPIO.out_w1tc = ((uint32_t)1 << BUZZER_PIN);
 }
 
 void audio_update(void) {

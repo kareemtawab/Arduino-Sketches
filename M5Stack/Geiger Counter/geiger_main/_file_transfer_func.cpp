@@ -1,3 +1,4 @@
+#include "def_data.c"
 #include "_file_transfer_func.h"
 #include "_eeprom_func.h"
 #include "_rtc_func.h"
@@ -12,6 +13,7 @@
 #include <ESPmDNS.h>            // Built-in
 #include <AsyncTCP.h>           // https://github.com/me-no-dev/AsyncTCP
 #include <ESPAsyncWebServer.h>  // https://github.com/me-no-dev/ESPAsyncWebServer
+
 #define FS SPIFFS               // In preparation for the introduction of LITTLFS see https://github.com/lorol/LITTLEFS replace SPIFFS with LITTLEFS
 
 const char *ft_server_ssid = "M5Core2 GM Counter";

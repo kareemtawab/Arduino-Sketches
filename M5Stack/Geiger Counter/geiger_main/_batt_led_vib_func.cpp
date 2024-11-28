@@ -1,9 +1,7 @@
+#include "def_data.c"
 #include "_batt_led_vib_func.h"
 #include "_file_transfer_func.h"
 #include <I2C_AXP192.h>
-
-#define BATTERY_VOLTAGE_MIN_LIMIT 2600
-#define BATTERY_VOLTAGE_MAX_LIMIT 4200
 
 int vib_delay;
 long vib_start;

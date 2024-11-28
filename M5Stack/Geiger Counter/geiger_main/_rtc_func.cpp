@@ -1,9 +1,8 @@
+#include "def_data.c"
 #include "_rtc_func.h"
 #include <I2C_BM8563.h>
 #include <UnixTime.h>
 #include <stdint.h>
-
-#define TIMEZONE 2
 
 int hours, minutes, seconds, days, months, years;
 uint32_t unix;
@@ -44,7 +43,7 @@ int rtc_get_day_phase(void) {
   }
 }
 
-void rtc_set_time_date(int h, int mi, int s, int d, int m, int y) {
+void rtc_set_time_date(int h, int mi, int s, int d, int m, int y, int t) {
   I2C_BM8563_DateTypeDef dateStruct;
   dateStruct.date = d;
   dateStruct.month = m;
@@ -54,7 +53,7 @@ void rtc_set_time_date(int h, int mi, int s, int d, int m, int y) {
   I2C_BM8563_TimeTypeDef timeStruct;
   timeStruct.hours = h;
   timeStruct.minutes = mi;
-  timeStruct.seconds = s;
+  timeStruct.seconds = s + t * 3600;
   rtc.setTime(&timeStruct);
 }
 
